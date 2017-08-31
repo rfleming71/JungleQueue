@@ -87,7 +87,7 @@ namespace JungleQueue
                 {
                     MessagePump pump = new MessagePump(_queue, configuration.RetryCount, messageProcessor, _messageLogger, x + 1);
                     _messagePumps.Add(pump);
-                    _messagePumpTasks.Add(new Task(() => pump.Run()));
+                    _messagePumpTasks.Add(new Task(async () => await pump.Run()));
                 }
             }
         }
@@ -98,6 +98,7 @@ namespace JungleQueue
         /// <returns>Instance of the queue</returns>
         public IQueue CreateSendQueue()
         {
+            _queue.Init().Wait();
             return new TransactionalQueue(_queue, _messageLogger);
         }
 
@@ -111,6 +112,7 @@ namespace JungleQueue
                 throw new InvalidOperationException("Queue is not configured for receive operations");
             }
 
+            _queue.Init().Wait();
             Log.Info("Starting message pumps");
             _messagePumpTasks.ForEach(x => x.Start());
         }

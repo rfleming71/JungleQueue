@@ -17,7 +17,7 @@ namespace TestApp.Handlers
 
         public Handler1()
         {
-            _log = LogManager.GetCurrentClassLogger();
+            _log = LogManager.GetLogger<Handler1>();
         }
 
         public void Handle(TestMessage message)

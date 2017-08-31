@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Common.Logging;
 using JungleQueue.Aws.Sqs;
 using JungleQueue.Interfaces;
@@ -92,7 +93,7 @@ namespace JungleQueue.Messaging
         /// <summary>
         /// Starts the loop for polling the SQS queue
         /// </summary>
-        public async void Run()
+        public async Task Run()
         {
             Log.InfoFormat("[{0}] Starting message pump", Id);
             while (!_cancellationToken.IsCancellationRequested)
@@ -122,7 +123,7 @@ namespace JungleQueue.Messaging
                         if (result.WasSuccessful)
                         {
                             Log.InfoFormat("[{0}] Removing message from the queue", Id);
-                            _queue.RemoveMessage(message);
+                            await _queue.RemoveMessage(message);
                         }
                         else if (message.AttemptNumber == _messageRetryCount)
                         {

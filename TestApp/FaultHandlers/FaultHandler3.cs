@@ -18,7 +18,7 @@ namespace ConsoleTestApp.FaultHandlers
 
         public FaultHandler3()
         {
-            _log = LogManager.GetCurrentClassLogger();
+            _log = LogManager.GetLogger<FaultHandler3>();
         }
 
         public void Handle(TransportMessage message, Exception ex)

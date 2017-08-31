@@ -41,14 +41,24 @@ namespace JungleQueue.Aws.Sqs
     public sealed class SqsQueue : ISqsQueue, IDisposable
     {
         /// <summary>
+        /// Underlying queue name
+        /// </summary>
+        private readonly string _queueName;
+
+        /// <summary>
+        /// Number of times to retry a message before moving it to the dead letter queue
+        /// </summary>
+        private readonly int _retryCount;
+
+        /// <summary>
         /// URL for the underlying queue
         /// </summary>
-        private readonly string _queueUrl;
+        private string _queueUrl;
 
         /// <summary>
         /// ARN for the underlying queue
         /// </summary>
-        private readonly string _queueArn;
+        private string _queueArn;
 
         /// <summary>
         /// Instance of the SQS service
@@ -64,20 +74,8 @@ namespace JungleQueue.Aws.Sqs
         public SqsQueue(RegionEndpoint endpoint, string queueName, int retryCount)
         {
             _simpleQueueService = new AmazonSQSClient(endpoint);
-            CreateQueueResponse createResponse = _simpleQueueService.CreateQueue(queueName);
-            _queueUrl = createResponse.QueueUrl;
-            var attributes = _simpleQueueService.GetAttributes(_queueUrl);
-            _queueArn = attributes["QueueArn"];
-            if (!attributes.ContainsKey("RedrivePolicy"))
-            {
-                createResponse = _simpleQueueService.CreateQueue(queueName + "_Dead_Letter");
-                string deadLetterQueue = createResponse.QueueUrl;
-                var deadLetterAttributes = _simpleQueueService.GetAttributes(deadLetterQueue);
-                string redrivePolicy = string.Format(CultureInfo.InvariantCulture, "{{\"maxReceiveCount\":\"{0}\", \"deadLetterTargetArn\":\"{1}\" }}", retryCount, deadLetterAttributes["QueueArn"]);
-                _simpleQueueService.SetQueueAttributes(_queueUrl, new Dictionary<string, string>() { { "RedrivePolicy", redrivePolicy }, { "MessageRetentionPeriod", "1209600" } });
-                _simpleQueueService.SetQueueAttributes(createResponse.QueueUrl, new Dictionary<string, string>() { { "MessageRetentionPeriod", "1209600" } });
-            }
-
+            _queueName = queueName;
+            _retryCount = retryCount;
             MessageParser = new MessageParser();
             MaxNumberOfMessages = 1;
         }
@@ -96,6 +94,32 @@ namespace JungleQueue.Aws.Sqs
         /// Gets or sets the message parser for inbound messages
         /// </summary>
         public IMessageParser MessageParser { get; set; }
+
+        /// <summary>
+        /// Initializes the queue
+        /// </summary>
+        /// <returns>Task</returns>
+        public async Task Init()
+        {
+            if (!string.IsNullOrWhiteSpace(_queueUrl))
+            {
+                return;
+            }
+
+            CreateQueueResponse createResponse = await _simpleQueueService.CreateQueueAsync(_queueName);
+            _queueUrl = createResponse.QueueUrl;
+            var attributes = await _simpleQueueService.GetAttributesAsync(_queueUrl);
+            _queueArn = attributes["QueueArn"];
+            if (!attributes.ContainsKey("RedrivePolicy"))
+            {
+                createResponse = await _simpleQueueService.CreateQueueAsync(_queueName + "_Dead_Letter");
+                string deadLetterQueue = createResponse.QueueUrl;
+                var deadLetterAttributes = await _simpleQueueService.GetAttributesAsync(deadLetterQueue);
+                string redrivePolicy = string.Format(CultureInfo.InvariantCulture, "{{\"maxReceiveCount\":\"{0}\", \"deadLetterTargetArn\":\"{1}\" }}", _retryCount, deadLetterAttributes["QueueArn"]);
+                await _simpleQueueService.SetQueueAttributesAsync(_queueUrl, new Dictionary<string, string>() { { "RedrivePolicy", redrivePolicy }, { "MessageRetentionPeriod", "1209600" } });
+                await _simpleQueueService.SetQueueAttributesAsync(createResponse.QueueUrl, new Dictionary<string, string>() { { "MessageRetentionPeriod", "1209600" } });
+            }
+        }
 
         /// <summary>
         /// Retrieve messages from the underlying queue
@@ -119,7 +143,7 @@ namespace JungleQueue.Aws.Sqs
         /// Removes a message from the queue
         /// </summary>
         /// <param name="message">Message to remove</param>
-        public void RemoveMessage(TransportMessage message)
+        public async Task RemoveMessage(TransportMessage message)
         {
             if (message == null)
             {
@@ -131,7 +155,7 @@ namespace JungleQueue.Aws.Sqs
                 throw new JungleException("Invalid receipt handle");
             }
 
-            _simpleQueueService.DeleteMessage(_queueUrl, message.ReceiptHandle);
+            await _simpleQueueService.DeleteMessageAsync(_queueUrl, message.ReceiptHandle);
         }
 
         /// <summary>
@@ -152,7 +176,7 @@ namespace JungleQueue.Aws.Sqs
         /// </summary>
         /// <param name="message">Message to add to the queue</param>
         /// <param name="metadata">Message metadata</param>
-        public void AddMessage(string message, IEnumerable<KeyValuePair<string, string>> metadata)
+        public async Task AddMessage(string message, IEnumerable<KeyValuePair<string, string>> metadata)
         {
             SendMessageRequest request = new SendMessageRequest(_queueUrl, message);
             foreach (KeyValuePair<string, string> kvp in metadata)
@@ -160,7 +184,7 @@ namespace JungleQueue.Aws.Sqs
                 request.MessageAttributes[kvp.Key] = new MessageAttributeValue() { StringValue = kvp.Value, DataType = "String" };
             }
 
-            _simpleQueueService.SendMessage(request);
+            await _simpleQueueService.SendMessageAsync(request);
         }
     }
 }

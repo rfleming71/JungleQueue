@@ -52,16 +52,22 @@ namespace JungleQueue.Aws.Sqs
         Task<IEnumerable<TransportMessage>> GetMessages(CancellationToken cancellationToken);
 
         /// <summary>
+        /// Initializes the queue
+        /// </summary>
+        /// <returns>Task</returns>
+        Task Init();
+
+        /// <summary>
         /// Removes a message from the queue
         /// </summary>
         /// <param name="message">Message to remove</param>
-        void RemoveMessage(TransportMessage message);
+        Task RemoveMessage(TransportMessage message);
 
         /// <summary>
         /// Adds the message to the queue
         /// </summary>
         /// <param name="message">Message to add to the queue</param>
         /// <param name="metadata">Message metadata</param>
-        void AddMessage(string message, IEnumerable<KeyValuePair<string, string>> metadata);
+        Task AddMessage(string message, IEnumerable<KeyValuePair<string, string>> metadata);
     }
 }

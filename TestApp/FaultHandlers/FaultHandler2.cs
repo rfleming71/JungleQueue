@@ -17,7 +17,7 @@ namespace ConsoleTestApp.FaultHandlers
 
         public FaultHandler2()
         {
-            _log = LogManager.GetCurrentClassLogger();
+            _log = LogManager.GetLogger<FaultHandler2>();
         }
 
         public void Handle(TestMessage message, Exception ex)

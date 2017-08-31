@@ -63,7 +63,7 @@ namespace JungleQueue.Configuration
                 Region = region,
                 FaultHandlers = new Dictionary<Type, HashSet<Type>>(),
                 Handlers = new Dictionary<Type, HashSet<Type>>(),
-                NumberOfPollingInstances = 1,
+                NumberOfPollingInstances = 0,
                 RetryCount = 5,
                 SqsPollWaitTime = 14,
             };
