@@ -195,7 +195,7 @@ namespace JungleQueue
                 new KeyValuePair<string, string>("messageType", type.AssemblyQualifiedName)
             };
             metadata.AddRange(GetCommonMetadata());
-            _queue.AddMessage(messageString, metadata);
+            _queue.AddMessage(messageString, metadata).Wait();
             _messageLogger.OutboundLogMessage(messageString, type.AssemblyQualifiedName);
             Log.TraceFormat("Sending message of type {0}", type);
         }
