@@ -111,7 +111,7 @@ namespace JungleQueue.Messaging
                         if (message.MessageParsingSucceeded)
                         {
                             Log.TraceFormat("[{0}] Processing message", Id);
-                            result = _messageProcessor.ProcessMessage(message);
+                            result = await _messageProcessor.ProcessMessage(message);
                             Log.TraceFormat("[{0}] Processed message - Error: {1}", Id, !result.WasSuccessful);
                         }
                         else

@@ -1,4 +1,4 @@
-﻿// <copyright file="IHandleMessage.cs">
+﻿// <copyright file="ProjectAssemblyInfo.cs">
 //     The MIT License (MIT)
 //
 // Copyright(c) 2016 Ryan Fleming
@@ -21,20 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // </copyright>
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
-namespace JungleQueue.Interfaces
-{
-    /// <summary>
-    /// Interface to mark a class as an event handler for event type T
-    /// </summary>
-    /// <typeparam name="T">Event type to handle</typeparam>
-    public interface IHandleMessage<T>
-    {
-        /// <summary>
-        /// Handle the message of type T
-        /// </summary>
-        /// <param name="message">Message to handle</param>
-        Task Handle(T message);
-    }
-}
+[assembly: InternalsVisibleTo("JungleQueue.Tests")]

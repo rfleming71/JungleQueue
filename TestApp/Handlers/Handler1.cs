@@ -1,4 +1,5 @@
 ﻿using System.Threading;
+using System.Threading.Tasks;
 using Common.Logging;
 using JungleQueue.Interfaces;
 using TestApp.Messages;
@@ -20,11 +21,12 @@ namespace TestApp.Handlers
             _log = LogManager.GetLogger<Handler1>();
         }
 
-        public void Handle(TestMessage message)
+        public Task Handle(TestMessage message)
         {
             _log.Info("Starting message Handler 1");
             Thread.Sleep(5000);
             _log.Info("Finished message Handler 1");
+            return Task.CompletedTask;
         }
     }
 }

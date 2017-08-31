@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Transactions;
 using Common.Logging;
 using JungleQueue.Interfaces;
@@ -83,7 +84,7 @@ namespace JungleQueue.Messaging
         /// </summary>
         /// <param name="message">Transport message to be dispatched to the event handlers</param>
         /// <returns>True is all event handlers processed successfully</returns>
-        public MessageProcessingResult ProcessMessage(TransportMessage message)
+        public async Task<MessageProcessingResult> ProcessMessage(TransportMessage message)
         {
             if (message == null)
             {
@@ -97,7 +98,7 @@ namespace JungleQueue.Messaging
             {
                 Log.TraceFormat("Processing {0} handlers for message type {1}", _handlerTypes[message.MessageType].Count, message.MessageTypeName);
                 var handlerMethod = typeof(IHandleMessage<>).MakeGenericType(message.MessageType).GetMethod("Handle");
-                using (TransactionScope transactionScope = new TransactionScope(TransactionScopeOption.Required))
+                using (TransactionScope transactionScope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled))
                 {
                     foreach (Type handlerType in _handlerTypes[message.MessageType])
                     {
@@ -114,17 +115,20 @@ namespace JungleQueue.Messaging
                             try
                             {
                                 var handler = childBuilder.GetValue(handlerType);
-                                handlerMethod.Invoke(handler, new object[] { message.Message });
+                                Task handlerTask = handlerMethod.Invoke(handler, new object[] { message.Message }) as Task;
+                                await handlerTask;
                             }
                             catch (TargetInvocationException ex)
                             {
                                 Log.ErrorFormat("Error in handling {0} with {1}", ex, message.MessageType.Name, handlerType.Name);
                                 result.Exception = ex.InnerException ?? ex;
+                                break;
                             }
                             catch (Exception ex)
                             {
                                 Log.ErrorFormat("Error in handling {0} with {1}", ex, message.MessageType.Name, handlerType.Name);
                                 result.Exception = ex;
+                                break;
                             }
                         }
                     }

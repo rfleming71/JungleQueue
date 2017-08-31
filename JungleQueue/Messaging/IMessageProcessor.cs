@@ -22,6 +22,7 @@
 // SOFTWARE.
 // </copyright>
 using System;
+using System.Threading.Tasks;
 using JungleQueue.Interfaces.Statistics;
 
 namespace JungleQueue.Messaging
@@ -36,7 +37,7 @@ namespace JungleQueue.Messaging
         /// </summary>
         /// <param name="message">Message to process</param>
         /// <returns>True is all event handles succeeded</returns>
-        MessageProcessingResult ProcessMessage(TransportMessage message);
+        Task<MessageProcessingResult> ProcessMessage(TransportMessage message);
 
         /// <summary>
         /// Processes inbound message that have faulted more than the retry limit
