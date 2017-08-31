@@ -91,56 +91,37 @@ namespace JungleQueue.Messaging
         public int Id { get; private set; }
 
         /// <summary>
+        /// Gets or sets the maximum number messages to process
+        /// simultaneously
+        /// </summary>
+        public int MaxSimultaneousMessages { get; set; }
+
+        /// <summary>
         /// Starts the loop for polling the SQS queue
         /// </summary>
         public async Task Run()
         {
-            Log.InfoFormat("[{0}] Starting message pump", Id);
+            Log.InfoFormat("Starting message pump with max sim messages of {0}", MaxSimultaneousMessages);
+            SemaphoreSlim semaphore = new SemaphoreSlim(MaxSimultaneousMessages);
             while (!_cancellationToken.IsCancellationRequested)
             {
                 Log.TraceFormat("[{0}] Starting receiving call", Id);
                 try
                 {
+                    await semaphore.WaitAsync(_cancellationToken.Token); // Wait for a worker slot to become available
                     IEnumerable<TransportMessage> ReceivedMessages = await _queue.GetMessages(_cancellationToken.Token);
                     Log.TraceFormat("[{1}] Received {0} messages", ReceivedMessages.Count(), Id);
+                    if (!ReceivedMessages.Any())
+                    {
+                        semaphore.Release(); // Mark the slot as free again if we aren't going to use it
+                    }
                     foreach (TransportMessage message in ReceivedMessages)
                     {
-                        Log.InfoFormat("[{1}] Received message of type '{0}'", message.MessageTypeName, Id);
-                        _messageLogger.InboundLogMessage(message.Body, message.MessageTypeName, message.Id, message.AttemptNumber);
-                        MessageProcessingResult result;
-                        if (message.MessageParsingSucceeded)
+                        ThreadPool.QueueUserWorkItem(async _ =>
                         {
-                            Log.TraceFormat("[{0}] Processing message", Id);
-                            result = await _messageProcessor.ProcessMessage(message);
-                            Log.TraceFormat("[{0}] Processed message - Error: {1}", Id, !result.WasSuccessful);
-                        }
-                        else
-                        {
-                            Log.ErrorFormat("[{1}] Failed to parse message of type {0}", message.Exception, message.MessageTypeName, Id);
-                            result = new MessageProcessingResult() { WasSuccessful = false, Exception = new Exception("Message parse failure") };
-                        }
-
-                        if (result.WasSuccessful)
-                        {
-                            Log.InfoFormat("[{0}] Removing message from the queue", Id);
-                            await _queue.RemoveMessage(message);
-                        }
-                        else if (message.AttemptNumber == _messageRetryCount)
-                        {
-                            Log.InfoFormat("[{0}] Message faulted ", Id);
-                            await _messageProcessor.ProcessFaultedMessage(message, result.Exception);
-                        }
-
-                        MessageStatistics stats = new MessageStatistics()
-                        {
-                            FinalAttempt = message.AttemptNumber == _messageRetryCount,
-                            HandlerRunTime = result.Runtime,
-                            MessageLength = message.Body.Length,
-                            MessageType = message.MessageTypeName,
-                            Success = result.WasSuccessful,
-                            PreviousRetryCount = message.AttemptNumber,
-                        };
-                        await _messageProcessor.ProcessMessageStatistics(stats);
+                            await ProcessMessage(message);
+                            semaphore.Release(); // Mark the slot as free again to resume message polling
+                        });
                     }
                 }
                 catch (OperationCanceledException)
@@ -151,6 +132,46 @@ namespace JungleQueue.Messaging
                     Log.ErrorFormat("[{0}] Error occurred in message pump run", ex, Id);
                 }
             }
+        }
+
+        private async Task ProcessMessage(TransportMessage message)
+        {
+            Log.InfoFormat("[{1}] Received message of type '{0}'", message.MessageTypeName, Id);
+            _messageLogger.InboundLogMessage(message.Body, message.MessageTypeName, message.Id, message.AttemptNumber);
+            MessageProcessingResult result;
+            if (message.MessageParsingSucceeded)
+            {
+                Log.TraceFormat("[{0}] Processing message", Id);
+                result = await _messageProcessor.ProcessMessage(message);
+                Log.TraceFormat("[{0}] Processed message - Error: {1}", Id, !result.WasSuccessful);
+            }
+            else
+            {
+                Log.ErrorFormat("[{1}] Failed to parse message of type {0}", message.Exception, message.MessageTypeName, Id);
+                result = new MessageProcessingResult() { WasSuccessful = false, Exception = new Exception("Message parse failure") };
+            }
+
+            if (result.WasSuccessful)
+            {
+                Log.InfoFormat("[{0}] Removing message from the queue", Id);
+                await _queue.RemoveMessage(message);
+            }
+            else if (message.AttemptNumber == _messageRetryCount)
+            {
+                Log.InfoFormat("[{0}] Message faulted ", Id);
+                await _messageProcessor.ProcessFaultedMessage(message, result.Exception);
+            }
+
+            MessageStatistics stats = new MessageStatistics()
+            {
+                FinalAttempt = message.AttemptNumber == _messageRetryCount,
+                HandlerRunTime = result.Runtime,
+                MessageLength = message.Body.Length,
+                MessageType = message.MessageTypeName,
+                Success = result.WasSuccessful,
+                PreviousRetryCount = message.AttemptNumber,
+            };
+            await _messageProcessor.ProcessMessageStatistics(stats);
         }
 
         /// <summary>

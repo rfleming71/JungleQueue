@@ -63,7 +63,7 @@ namespace JungleQueue.Configuration
                 Region = region,
                 FaultHandlers = new Dictionary<Type, HashSet<Type>>(),
                 Handlers = new Dictionary<Type, HashSet<Type>>(),
-                NumberOfPollingInstances = 0,
+                MaxSimultaneousMessages = 0,
                 RetryCount = 5,
                 SqsPollWaitTime = 14,
             };
@@ -135,7 +135,7 @@ namespace JungleQueue.Configuration
         }
 
         /// <summary>
-        /// Configure the polling wait time for receive bus
+        /// Configure the polling wait time for receive queue
         /// </summary>
         /// <param name="configuration">Configuration to modify</param>
         /// <param name="timeInSeconds">Number of seconds to the long polling to wait</param>
@@ -157,16 +157,16 @@ namespace JungleQueue.Configuration
         }
 
         /// <summary>
-        /// Configure the number of polling instances to run for receive bus
+        /// Configure the messages that can be processed simultaneously
         /// </summary>
         /// <param name="configuration">Configuration to modify</param>
         /// <param name="instances">Number of polling instances to run</param>
         /// <returns>Modified configuration</returns>
-        public static QueueConfiguration SetNumberOfPollingInstances(this QueueConfiguration configuration, int instances)
+        public static QueueConfiguration WithMaxSimultaneousMessages(this QueueConfiguration configuration, int instances)
         {
             if (instances < 0)
             {
-                throw new JungleConfigurationException("instances", "Number of instances must be zero or greater");
+                throw new JungleConfigurationException("instances", "Number of simultaneous messages must be greater than 0");
             }
 
             if (configuration == null)
@@ -174,7 +174,7 @@ namespace JungleQueue.Configuration
                 throw new JungleConfigurationException("configuration", "Configuration cannot be null");
             }
 
-            configuration.NumberOfPollingInstances = instances;
+            configuration.MaxSimultaneousMessages = instances;
             return configuration;
         }
 
@@ -190,6 +190,11 @@ namespace JungleQueue.Configuration
             if (configuration.Handlers == null || !configuration.Handlers.Any())
             {
                 throw new JungleConfigurationException("Handlers", "No messages handlers configured");
+            }
+
+            if (configuration.MaxSimultaneousMessages <= 0)
+            {
+                throw new JungleConfigurationException("instances", "Number of simultaneous messages must be greater than 0");
             }
 
             JungleQueue jungleQueue = new JungleQueue(configuration);

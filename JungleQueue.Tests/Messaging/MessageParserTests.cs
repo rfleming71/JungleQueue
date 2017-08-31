@@ -50,7 +50,7 @@ namespace JungleQueue.Tests.Messaging
   ""SigningCertURL"" : ""https://google.com/"",
   ""UnsubscribeURL"" : ""https://google.com/"",
   ""MessageAttributes"" : {
-                    ""BusVersion"" : { ""Type"":""String"",""Value"":""2.1.0.0""},
+                    ""QueueVersion"" : { ""Type"":""String"",""Value"":""2.1.0.0""},
     ""SenderIpAddress"" : { ""Type"":""String"",""Value"":""127.0.0.1""},
     ""messageType"" : { ""Type"":""String"",""Value"":""" + typeof(TestMessage).AssemblyQualifiedName + @"""},
     ""SenderVersion"" : { ""Type"":""String"",""Value"":""1.2.0.0""},

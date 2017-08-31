@@ -53,7 +53,7 @@ namespace JungleQueue.Configuration
         /// <summary>
         /// Gets or sets the number of polling instances to run
         /// </summary>
-        public int NumberOfPollingInstances { get; set; }
+        public int MaxSimultaneousMessages { get; set; }
 
         /// <summary>
         /// Gets or sets the number of seconds to long poll for

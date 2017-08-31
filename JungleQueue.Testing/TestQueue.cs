@@ -47,7 +47,7 @@ namespace JungleQueue.Testing
         }
 
         /// <summary>
-        /// Send a message to the bus's input queue
+        /// Send a message to the input queue
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="messageBuilder">Function to initialize the message</param>
@@ -60,7 +60,7 @@ namespace JungleQueue.Testing
         }
 
         /// <summary>
-        /// Send a message to the bus's input queue
+        /// Send a message to the input queue
         /// </summary>
         /// <typeparam name="T">Message type</typeparam>
         /// <param name="message">Message to send</param>

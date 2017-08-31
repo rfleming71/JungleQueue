@@ -52,12 +52,12 @@ namespace JungleQueue
         /// <summary>
         /// Receive event message pump
         /// </summary>
-        private readonly List<MessagePump> _messagePumps;
+        private readonly MessagePump _messagePump;
 
         /// <summary>
-        /// Tasks running the message pumps
+        /// Receive event message pump
         /// </summary>
-        private readonly List<Task> _messagePumpTasks;
+        private Task _messagePumpTask;
 
         /// <summary>
         /// Message Logger
@@ -78,17 +78,11 @@ namespace JungleQueue
             };
             _queue = new SqsQueue(configuration.Region, configuration.QueueName, configuration.RetryCount);
             _queue.WaitTimeSeconds = configuration.SqsPollWaitTime;
-            MessageProcessor messageProcessor = new MessageProcessor(configuration.Handlers, configuration.FaultHandlers, configuration.ObjectBuilder, queuePreHandler);
-            if (configuration.NumberOfPollingInstances > 0)
+            if (configuration.MaxSimultaneousMessages > 0)
             {
-                _messagePumps = new List<MessagePump>();
-                _messagePumpTasks = new List<Task>();
-                for (int x = 0; x < configuration.NumberOfPollingInstances; ++x)
-                {
-                    MessagePump pump = new MessagePump(_queue, configuration.RetryCount, messageProcessor, _messageLogger, x + 1);
-                    _messagePumps.Add(pump);
-                    _messagePumpTasks.Add(new Task(async () => await pump.Run()));
-                }
+                MessageProcessor messageProcessor = new MessageProcessor(configuration.Handlers, configuration.FaultHandlers, configuration.ObjectBuilder, queuePreHandler);
+                _messagePump = new MessagePump(_queue, configuration.RetryCount, messageProcessor, _messageLogger, 1);
+                _messagePump.MaxSimultaneousMessages = configuration.MaxSimultaneousMessages;
             }
         }
 
@@ -107,14 +101,14 @@ namespace JungleQueue
         /// </summary>
         public void StartReceiving()
         {
-            if (_messagePumpTasks == null || !_messagePumpTasks.Any())
+            if (_messagePump == null)
             {
                 throw new InvalidOperationException("Queue is not configured for receive operations");
             }
 
             _queue.Init().Wait();
             Log.Info("Starting message pumps");
-            _messagePumpTasks.ForEach(x => x.Start());
+            _messagePumpTask = _messagePump.Run();
         }
 
         /// <summary>
@@ -123,11 +117,10 @@ namespace JungleQueue
         public void StopReceiving()
         {
             Log.Info("Stopping the queue");
-            _messagePumps.ForEach(x => x.Stop());
-            Task.WaitAll(_messagePumpTasks.ToArray());
-            _messagePumps.ForEach(x => x.Dispose());
-            _messagePumps.Clear();
-            _messagePumpTasks.Clear();
+            _messagePump.Stop();
+            Task.WaitAll(_messagePumpTask);
+            _messagePump.Dispose();
+            _messagePumpTask = null;
         }
     }
 }
