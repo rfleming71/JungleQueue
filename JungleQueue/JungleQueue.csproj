@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseUrl>https://github.com/rfleming71/JungleQueue/blob/master/LICENSE</PackageLicenseUrl>
+    <Company>Ryan Fleming</Company>
+    <Authors>Ryan Fleming</Authors>
+    <Copyright>Copyright 2017</Copyright>
+    <PackageProjectUrl>https://github.com/rfleming71/JungleQueue</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rfleming71/JungleQueue</RepositoryUrl>
+    <PackageTags>Queue AWS Amazon-web-services SQS</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" Version="3.1.0" />
+    <PackageReference Include="Common.Logging" Version="3.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JungleQueue.Interfaces\JungleQueue.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>

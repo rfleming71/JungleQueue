@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageTags>Queue AWS Amazon-web-services SQS</PackageTags>
+    <Description>Simple queue built on top of Amazon Web Services</Description>
+    <Copyright>Copyright 2017</Copyright>
+    <PackageProjectUrl>https://github.com/rfleming71/JungleQueue</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rfleming71/JungleQueue</RepositoryUrl>
+    <PackageIconUrl></PackageIconUrl>
+    <Authors>Ryan Fleming</Authors>
+    <Company>Ryan Fleming</Company>
+    <PackageLicenseUrl>https://github.com/rfleming71/JungleQueue/blob/master/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
+
+</Project>

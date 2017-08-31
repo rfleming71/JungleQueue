@@ -1,0 +1,25 @@
+﻿using Common.Logging;
+using JungleQueue.Interfaces;
+using TestApp.Messages;
+
+namespace TestApp.Handlers
+{
+    public class Handler3 : IHandleMessage<TestMessage2>
+    {
+        private readonly ILog _log;
+        public Handler3(ILog log)
+        {
+            _log = log;
+        }
+
+        public Handler3()
+        {
+            _log = LogManager.GetCurrentClassLogger();
+        }
+
+        public void Handle(TestMessage2 message)
+        {
+            _log.Info("Handling message Handler 3");
+        }
+    }
+}
