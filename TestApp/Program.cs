@@ -46,7 +46,7 @@ namespace TestApp
                 .EnableMessageLogging()
                 .SetSqsPollWaitTime(14)
                 .UsingEventHandlersFromEntryAssembly()
-                .WithMaxSimultaneousMessages(4)
+                .WithMaxSimultaneousMessages(1)
                 .CreateStartableQueue();
         }
     }

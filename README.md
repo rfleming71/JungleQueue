@@ -10,7 +10,7 @@ var queue = QueueBuilder.Create("JungleQueue_Testing", RegionEndpoint.USEast1)
 	.EnableMessageLogging()
 	.SetSqsPollWaitTime(14)
 	.UsingEventHandlersFromEntryAssembly()
-	.SetNumberOfPollingInstances(1)
+	.WithMaxSimultaneousMessages(1)
 	.CreateStartableQueue();
 
 queue.StartReceiving();
