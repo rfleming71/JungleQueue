@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Common.Logging;
 using JungleQueue.Interfaces;
 using JungleQueue.Messaging;
@@ -21,9 +22,10 @@ namespace ConsoleTestApp.FaultHandlers
             _log = LogManager.GetLogger<FaultHandler3>();
         }
 
-        public void Handle(TransportMessage message, Exception ex)
+        public Task Handle(TransportMessage message, Exception ex)
         {
             _log.Info("Starting message fault Handler 3");
+            return Task.CompletedTask;
         }
     }
 }

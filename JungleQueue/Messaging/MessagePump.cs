@@ -128,7 +128,7 @@ namespace JungleQueue.Messaging
                         else if (message.AttemptNumber == _messageRetryCount)
                         {
                             Log.InfoFormat("[{0}] Message faulted ", Id);
-                            _messageProcessor.ProcessFaultedMessage(message, result.Exception);
+                            await _messageProcessor.ProcessFaultedMessage(message, result.Exception);
                         }
 
                         MessageStatistics stats = new MessageStatistics()
@@ -140,7 +140,7 @@ namespace JungleQueue.Messaging
                             Success = result.WasSuccessful,
                             PreviousRetryCount = message.AttemptNumber,
                         };
-                        _messageProcessor.ProcessMessageStatistics(stats);
+                        await _messageProcessor.ProcessMessageStatistics(stats);
                     }
                 }
                 catch (OperationCanceledException)

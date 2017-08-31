@@ -44,12 +44,12 @@ namespace JungleQueue.Messaging
         /// </summary>
         /// <param name="message">Message to process</param>
         /// <param name="ex">Exception thrown by the message</param>
-        void ProcessFaultedMessage(TransportMessage message, Exception ex);
+        Task ProcessFaultedMessage(TransportMessage message, Exception ex);
 
         /// <summary>
         /// Processes inbound message statistics
         /// </summary>
         /// <param name="statistics">Message statistics</param>
-        void ProcessMessageStatistics(IMessageStatistics statistics);
+        Task ProcessMessageStatistics(IMessageStatistics statistics);
     }
 }

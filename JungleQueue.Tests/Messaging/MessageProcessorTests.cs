@@ -110,20 +110,20 @@ namespace JungleQueue.Tests.Messaging
         }
 
         [TestMethod]
-        public void MessageProcessorTests_process_fault()
+        public async Task MessageProcessorTests_process_fault()
         {
-            _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
+            await _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
             Assert.AreEqual(1, _testFaultHandler1Called);
             Assert.AreEqual(1, _testFaultHandler2Called);
             Assert.AreEqual(0, _testFaultHandler3Called);
         }
 
         [TestMethod]
-        public void MessageProcessorTests_process_fault_with_preHandler()
+        public async Task MessageProcessorTests_process_fault_with_preHandler()
         {
             int preHandlerCallCount = 0;
             _processor = new MessageProcessor(_typeMapping, _faultHandlers, _objectBuilder.Object, x => preHandlerCallCount++);
-            _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
+            await _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
             Assert.AreEqual(1, _testFaultHandler1Called);
             Assert.AreEqual(1, _testFaultHandler2Called);
             Assert.AreEqual(0, _testFaultHandler3Called);
@@ -131,10 +131,10 @@ namespace JungleQueue.Tests.Messaging
         }
 
         [TestMethod]
-        public void MessageProcessorTests_process_general_and_message_handlers()
+        public async Task MessageProcessorTests_process_general_and_message_handlers()
         {
             _faultHandlers[typeof(TransportMessage)] = new HashSet<Type>() { typeof(TestFaultHandler) };
-            _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
+            await _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
             Assert.AreEqual(1, _testFaultHandler1Called);
             Assert.AreEqual(1, _testFaultHandler2Called);
             Assert.AreEqual(0, _testFaultHandler3Called);
@@ -142,11 +142,11 @@ namespace JungleQueue.Tests.Messaging
         }
 
         [TestMethod]
-        public void MessageProcessorTests_process_general_handlers()
+        public async Task MessageProcessorTests_process_general_handlers()
         {
             _faultHandlers.Remove(typeof(TestMessage));
             _faultHandlers[typeof(TransportMessage)] = new HashSet<Type>() { typeof(TestFaultHandler) };
-            _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
+            await _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
             Assert.AreEqual(0, _testFaultHandler1Called);
             Assert.AreEqual(0, _testFaultHandler2Called);
             Assert.AreEqual(0, _testFaultHandler3Called);
@@ -154,11 +154,11 @@ namespace JungleQueue.Tests.Messaging
         }
 
         [TestMethod]
-        public void MessageProcessorTests_process_general_handlers_on_parse_failure()
+        public async Task MessageProcessorTests_process_general_handlers_on_parse_failure()
         {
             _faultHandlers[typeof(TransportMessage)] = new HashSet<Type>() { typeof(TestFaultHandler) };
             _message.MessageParsingSucceeded = false;
-            _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
+            await _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
             Assert.AreEqual(0, _testFaultHandler1Called);
             Assert.AreEqual(0, _testFaultHandler2Called);
             Assert.AreEqual(0, _testFaultHandler3Called);
@@ -166,10 +166,10 @@ namespace JungleQueue.Tests.Messaging
         }
 
         [TestMethod]
-        public void MessageProcessorTests_Exception_Thrown_Fault_Handler()
+        public async Task MessageProcessorTests_Exception_Thrown_Fault_Handler()
         {
             _faultHandlers[typeof(TestMessage)].Add(typeof(TestFaultHandler3));
-            _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
+            await _processor.ProcessFaultedMessage(_message, new Exception("Foo!"));
             Assert.AreEqual(1, _testFaultHandler1Called);
             Assert.AreEqual(1, _testFaultHandler2Called);
             Assert.AreEqual(1, _testFaultHandler3Called);
@@ -190,18 +190,18 @@ namespace JungleQueue.Tests.Messaging
         }
 
         [TestMethod]
-        public void MessageProcessorTests_Process_Message_Stats()
+        public async Task MessageProcessorTests_Process_Message_Stats()
         {
-            _processor.ProcessMessageStatistics(new MessageStatistics());
+            await _processor.ProcessMessageStatistics(new MessageStatistics());
             Assert.AreEqual(1, _testStatHandler1Called);
             Assert.AreEqual(1, _testStatHandler2Called);
         }
 
         [TestMethod]
-        public void MessageProcessorTests_Process_Message_Stats_With_No_Handlers()
+        public async Task MessageProcessorTests_Process_Message_Stats_With_No_Handlers()
         {
             _objectBuilder.Setup(x => x.GetValues<IWantMessageStatistics>()).Returns<IEnumerable<IWantMessageStatistics>>(null);
-            _processor.ProcessMessageStatistics(new MessageStatistics());
+            await _processor.ProcessMessageStatistics(new MessageStatistics());
             Assert.AreEqual(0, _testStatHandler1Called);
             Assert.AreEqual(0, _testStatHandler2Called);
         }
@@ -237,7 +237,7 @@ namespace JungleQueue.Tests.Messaging
 
         class TestFaultHandler1 : IHandleMessageFaults<TestMessage>
         {
-            public void Handle(TestMessage message, Exception ex)
+            public Task Handle(TestMessage message, Exception ex)
             {
                 ++_testFaultHandler1Called;
                 throw new Exception("Exception!");
@@ -246,15 +246,16 @@ namespace JungleQueue.Tests.Messaging
 
         class TestFaultHandler2 : IHandleMessageFaults<TestMessage>
         {
-            public void Handle(TestMessage message, Exception ex)
+            public Task Handle(TestMessage message, Exception ex)
             {
                 ++_testFaultHandler2Called;
+                return Task.CompletedTask;
             }
         }
 
         class TestFaultHandler3 : IHandleMessageFaults<TestMessage>
         {
-            public void Handle(TestMessage message, Exception ex)
+            public Task Handle(TestMessage message, Exception ex)
             {
                 ++_testFaultHandler3Called;
                 throw new Exception("Exception!");
@@ -263,25 +264,28 @@ namespace JungleQueue.Tests.Messaging
 
         class TestFaultHandler : IHandleMessageFaults<TransportMessage>
         {
-            public void Handle(TransportMessage message, Exception ex)
+            public Task Handle(TransportMessage message, Exception ex)
             {
                 ++_transportMessageFaultHandler;
+                return Task.CompletedTask;
             }
         }
 
         class TestStatHandler1 : IWantMessageStatistics
         {
-            public void ReceiveStatisitics(IMessageStatistics statistics)
+            public Task ReceiveStatisitics(IMessageStatistics statistics)
             {
                 ++_testStatHandler1Called;
+                return Task.CompletedTask;
             }
         }
 
         class TestStatHandler2 : IWantMessageStatistics
         {
-            public void ReceiveStatisitics(IMessageStatistics statistics)
+            public Task ReceiveStatisitics(IMessageStatistics statistics)
             {
                 ++_testStatHandler2Called;
+                return Task.CompletedTask;
             }
         }
 

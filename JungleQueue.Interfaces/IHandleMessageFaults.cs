@@ -22,6 +22,7 @@
 // SOFTWARE.
 // </copyright>
 using System;
+using System.Threading.Tasks;
 
 namespace JungleQueue.Interfaces
 {
@@ -36,6 +37,6 @@ namespace JungleQueue.Interfaces
         /// </summary>
         /// <param name="message">Message to handle</param>
         /// <param name="ex">Exception caused by the message</param>
-        void Handle(T message, Exception ex);
+        Task Handle(T message, Exception ex);
     }
 }

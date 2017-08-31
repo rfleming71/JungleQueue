@@ -22,6 +22,8 @@
 // SOFTWARE.
 // </copyright>
 
+using System.Threading.Tasks;
+
 namespace JungleQueue.Interfaces.Statistics
 {
     /// <summary>
@@ -33,6 +35,6 @@ namespace JungleQueue.Interfaces.Statistics
         /// Called when a message completes processing
         /// </summary>
         /// <param name="statistics">Message Statistics</param>
-        void ReceiveStatisitics(IMessageStatistics statistics);
+        Task ReceiveStatisitics(IMessageStatistics statistics);
     }
 }

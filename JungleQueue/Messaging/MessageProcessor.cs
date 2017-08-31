@@ -157,12 +157,12 @@ namespace JungleQueue.Messaging
         /// </summary>
         /// <param name="message">Message to process</param>
         /// <param name="ex">Exception caused by the message</param>
-        public void ProcessFaultedMessage(TransportMessage message, Exception ex)
+        public async Task ProcessFaultedMessage(TransportMessage message, Exception ex)
         {
-            ProcessFaultedMessageHandlers(message, ex);
+            await ProcessFaultedMessageHandlers(message, ex);
             if (message.MessageParsingSucceeded)
             {
-                ProcessFaultedMessageHandlers(message.Message, ex);
+                await ProcessFaultedMessageHandlers(message.Message, ex);
             }
         }
 
@@ -170,14 +170,14 @@ namespace JungleQueue.Messaging
         /// Processes inbound message statistics
         /// </summary>
         /// <param name="statistics">Message statistics</param>
-        public void ProcessMessageStatistics(IMessageStatistics statistics)
+        public async Task ProcessMessageStatistics(IMessageStatistics statistics)
         {
             var Receivers = _objectBuilder.GetValues<IWantMessageStatistics>();
             if (Receivers != null)
             {
                 foreach (IWantMessageStatistics Receiver in Receivers)
                 {
-                    Receiver.ReceiveStatisitics(statistics);
+                    await Receiver.ReceiveStatisitics(statistics);
                 }
             }
         }
@@ -187,7 +187,7 @@ namespace JungleQueue.Messaging
         /// </summary>
         /// <param name="message">Message to process</param>
         /// <param name="messageException">Exception caused by the message</param>
-        private void ProcessFaultedMessageHandlers(object message, Exception messageException)
+        private async Task ProcessFaultedMessageHandlers(object message, Exception messageException)
         {
             Type messageType = message.GetType();
             if (_faultHandlers.ContainsKey(messageType))
@@ -209,7 +209,8 @@ namespace JungleQueue.Messaging
                         try
                         {
                             var handler = childBuilder.GetValue(handlerType);
-                            handlerMethod.Invoke(handler, new object[] { message, messageException });
+                            Task handlerTask = handlerMethod.Invoke(handler, new object[] { message, messageException }) as Task;
+                            await handlerTask;
                         }
                         catch (Exception ex)
                         {
