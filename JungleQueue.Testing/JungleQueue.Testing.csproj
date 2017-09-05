@@ -2,6 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Authors>Ryan Fleming</Authors>
+    <Company>Ryan Fleming</Company>
+    <Copyright>Copyright 2017</Copyright>
+    <PackageLicenseUrl>https://github.com/rfleming71/JungleQueue/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/rfleming71/JungleQueue/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rfleming71/JungleQueue</RepositoryUrl>
+    <PackageTags>Queue AWS Amazon-web-services SQS</PackageTags>
+    <Description>Testing utilities for JungleQueue</Description>
   </PropertyGroup>
 
   <ItemGroup>

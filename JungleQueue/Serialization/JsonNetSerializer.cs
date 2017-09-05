@@ -33,7 +33,7 @@ namespace JungleQueue.Serialization
     /// Serializes and deserializes message for transport over the queue
     /// using JSON.Net
     /// </summary>
-    internal class JsonNetSerializer : IMessageSerializer
+    public class JsonNetSerializer : IMessageSerializer
     {
         /// <summary>
         /// Instance of the JSON serializer

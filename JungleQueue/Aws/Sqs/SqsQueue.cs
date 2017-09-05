@@ -81,6 +81,11 @@ namespace JungleQueue.Aws.Sqs
         }
 
         /// <summary>
+        /// Gets the URL for the queue
+        /// </summary>
+        public string Url { get { return _queueUrl; } }
+
+        /// <summary>
         /// Gets or sets the number of seconds to long poll for
         /// </summary>
         public int WaitTimeSeconds { get; set; }

@@ -35,6 +35,11 @@ namespace JungleQueue.Aws.Sqs
     public interface ISqsQueue : IDisposable
     {
         /// <summary>
+        /// Gets the URL for the queue
+        /// </summary>
+        string Url { get; }
+
+        /// <summary>
         /// Gets or sets the number of seconds to long poll for
         /// </summary>
         int WaitTimeSeconds { get; set; }

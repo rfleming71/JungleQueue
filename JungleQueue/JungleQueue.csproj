@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageLicenseUrl>https://github.com/rfleming71/JungleQueue/blob/master/LICENSE</PackageLicenseUrl>
@@ -11,6 +11,8 @@
     <PackageProjectUrl>https://github.com/rfleming71/JungleQueue</PackageProjectUrl>
     <RepositoryUrl>https://github.com/rfleming71/JungleQueue</RepositoryUrl>
     <PackageTags>Queue AWS Amazon-web-services SQS</PackageTags>
+    <Version>1.0.0</Version>
+    <Description>Strongly type message queues built on with Amazon SQS</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +23,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JungleQueue.Interfaces\JungleQueue.Interfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Transactions" Condition="'$(TargetFramework)' == 'net452'" />
   </ItemGroup>
 
 </Project>
