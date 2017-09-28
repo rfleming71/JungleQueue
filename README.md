@@ -1,5 +1,6 @@
 # JungleBus
 Transactional queue built on top of Amazon Web Services.
+[![Build status](https://ci.appveyor.com/api/projects/status/3dxjsva48y40rp2y/branch/development?svg=true)](https://ci.appveyor.com/project/rfleming71/junglequeue/branch/development)
 
 # Creating the Queue
 Creates a queue that can send and recieve messages
