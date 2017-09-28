@@ -24,7 +24,7 @@ namespace ConsoleTestApp.FaultHandlers
         public Task Handle(TestMessage message, Exception ex)
         {
             _log.Info("Starting message fault Handler 2");
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }

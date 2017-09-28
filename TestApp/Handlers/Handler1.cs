@@ -26,7 +26,7 @@ namespace TestApp.Handlers
             _log.Info("Starting message Handler 1");
             Thread.Sleep(5000);
             _log.Info("Finished message Handler 1");
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }

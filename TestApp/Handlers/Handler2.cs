@@ -33,7 +33,7 @@ namespace TestApp.Handlers
 
             _log.Info("Sent TestMessage2");*/
             _log.Info("Finished message Handler 2");
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }
