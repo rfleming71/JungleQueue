@@ -30,6 +30,7 @@ using JungleQueue.Aws.Sqs;
 using JungleQueue.Configuration;
 using JungleQueue.Interfaces;
 using JungleQueue.Interfaces.IoC;
+using JungleQueue.Interfaces.Serialization;
 using JungleQueue.Messaging;
 
 namespace JungleQueue
@@ -65,12 +66,18 @@ namespace JungleQueue
         private readonly IMessageLogger _messageLogger;
 
         /// <summary>
+        /// Message serializer
+        /// </summary>
+        private readonly IMessageSerializer _messageSerializer;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="JungleQueue" /> class.
         /// </summary>
         /// <param name="configuration">Configuration object</param>
         public JungleQueue(QueueConfiguration configuration)
         {
             _messageLogger = configuration.MessageLogger;
+            _messageSerializer = configuration.MessageSerializer;
             Action<IObjectBuilder> queuePreHandler = x =>
             {
                 x.RegisterInstance(CreateSendQueue());
@@ -80,8 +87,9 @@ namespace JungleQueue
             _queue.WaitTimeSeconds = configuration.SqsPollWaitTime;
             if (configuration.MaxSimultaneousMessages > 0)
             {
+                MessageParser parser = new MessageParser(configuration.MessageSerializer);
                 MessageProcessor messageProcessor = new MessageProcessor(configuration.Handlers, configuration.FaultHandlers, configuration.ObjectBuilder, queuePreHandler);
-                _messagePump = new MessagePump(_queue, configuration.RetryCount, messageProcessor, _messageLogger, 1);
+                _messagePump = new MessagePump(_queue, configuration.RetryCount, messageProcessor, _messageLogger, parser);
                 _messagePump.MaxSimultaneousMessages = configuration.MaxSimultaneousMessages;
             }
         }
@@ -93,7 +101,7 @@ namespace JungleQueue
         public IQueue CreateSendQueue()
         {
             _queue.Init().Wait();
-            return new TransactionalQueue(_queue, _messageLogger);
+            return new TransactionalQueue(_queue, _messageLogger, _messageSerializer);
         }
 
         /// <summary>

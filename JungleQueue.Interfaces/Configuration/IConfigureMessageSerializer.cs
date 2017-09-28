@@ -21,7 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // </copyright>
-using JungleQueue.Interfaces.IoC;
+using JungleQueue.Interfaces.Serialization;
 
 namespace JungleQueue.Interfaces.Configuration
 {
@@ -30,9 +30,6 @@ namespace JungleQueue.Interfaces.Configuration
     /// </summary>
     public interface IConfigureMessageSerializer
     {
-        /// <summary>
-        /// Gets the service locator for message handlers 
-        /// </summary>
-        IObjectBuilder ObjectBuilder { get; }
+        IMessageSerializer MessageSerializer { get; set; }
     }
 }

@@ -30,6 +30,7 @@ using JungleQueue.Interfaces.Configuration;
 using JungleQueue.Interfaces.Exceptions;
 using JungleQueue.Interfaces.IoC;
 using JungleQueue.Messaging;
+using JungleQueue.Serialization;
 
 namespace JungleQueue.Configuration
 {
@@ -70,7 +71,7 @@ namespace JungleQueue.Configuration
         }
 
         /// <summary>
-        /// Configure the the queue to use a given object builder to build the handlers
+        /// Configure the queue to use a given object builder to build the handlers
         /// </summary>
         /// <param name="configuration">Configuration to modify</param>
         /// <param name="objectBuilder">Object Builder to use</param>
@@ -87,7 +88,7 @@ namespace JungleQueue.Configuration
         }
 
         /// <summary>
-        /// Configure the the queue to use the simple object builder to build the handlers
+        /// Configure the queue to use the simple object builder to build the handlers
         /// </summary>
         /// <param name="configuration">Configuration to modify</param>
         /// <returns>Modified configuration</returns>
@@ -97,7 +98,7 @@ namespace JungleQueue.Configuration
         }
 
         /// <summary>
-        /// Configure the the queue to use JSON serialization of the messages
+        /// Configure the queue to use JSON serialization of the messages
         /// </summary>
         /// <param name="configuration">Configuration to modify</param>
         /// <returns>Modified configuration</returns>
@@ -108,18 +109,12 @@ namespace JungleQueue.Configuration
                 throw new JungleConfigurationException("configuration", "Configuration cannot be null");
             }
 
-            if (configuration.ObjectBuilder == null)
-            {
-                throw new JungleConfigurationException("ObjectBuilder", "Object builder must be set");
-            }
-
-            // ToDo: Currently not being used, should reintroduce the message serializer in the next version
-            // configuration.ObjectBuilder.RegisterInstance<IMessageSerializer>(new JsonNetSerializer());
+            configuration.MessageSerializer = new JsonNetSerializer();
             return configuration as QueueConfiguration;
         }
 
         /// <summary>
-        /// Configure the the queue to use log inbound and outbound messages
+        /// Configure the queue to use log inbound and outbound messages
         /// </summary>
         /// <param name="configuration">Configuration to modify</param>
         /// <returns>Modified configuration</returns>

@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseUrl>https://github.com/rfleming71/JungleQueue/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/rfleming71/JungleQueue</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/rfleming71/JungleQueue</RepositoryUrl>
+    <PackageTags>Queue AWS Amazon-web-services SQS</PackageTags>
+    <Copyright>Copyright 2017</Copyright>
+    <Authors>Ryan Fleming</Authors>
+    <Company>Ryan Fleming</Company>
+    <Description>Structure map container support for JungleQueue</Description>
+    <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StructureMap" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JungleQueue.Interfaces\JungleQueue.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>

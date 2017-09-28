@@ -76,7 +76,6 @@ namespace JungleQueue.Aws.Sqs
             _simpleQueueService = new AmazonSQSClient(endpoint);
             _queueName = queueName;
             _retryCount = retryCount;
-            MessageParser = new MessageParser();
             MaxNumberOfMessages = 1;
         }
 
@@ -94,11 +93,6 @@ namespace JungleQueue.Aws.Sqs
         /// Gets or sets the maximum number of messages the request can retrieve
         /// </summary>
         public int MaxNumberOfMessages { get; set; }
-
-        /// <summary>
-        /// Gets or sets the message parser for inbound messages
-        /// </summary>
-        public IMessageParser MessageParser { get; set; }
 
         /// <summary>
         /// Initializes the queue
@@ -129,9 +123,10 @@ namespace JungleQueue.Aws.Sqs
         /// <summary>
         /// Retrieve messages from the underlying queue
         /// </summary>
+        /// <param name="messageParser">Parses the inbound messages</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Messages or empty</returns>
-        public async Task<IEnumerable<TransportMessage>> GetMessages(CancellationToken cancellationToken)
+        public async Task<IEnumerable<TransportMessage>> GetMessages(IMessageParser messageParser, CancellationToken cancellationToken)
         {
             ReceiveMessageRequest receiveMessageRequest = new ReceiveMessageRequest();
             receiveMessageRequest.WaitTimeSeconds = WaitTimeSeconds;
@@ -141,7 +136,7 @@ namespace JungleQueue.Aws.Sqs
             receiveMessageRequest.QueueUrl = _queueUrl;
 
             ReceiveMessageResponse receiveMessageResponse = await _simpleQueueService.ReceiveMessageAsync(receiveMessageRequest, cancellationToken);
-            return receiveMessageResponse.Messages.Select(x => MessageParser.ParseMessage(x)).ToList();
+            return receiveMessageResponse.Messages.Select(x => messageParser.ParseMessage(x)).ToList();
         }
 
         /// <summary>

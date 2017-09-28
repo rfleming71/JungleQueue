@@ -24,7 +24,7 @@
 using System;
 using Amazon.SQS.Model;
 using JungleQueue.Interfaces.Exceptions;
-using Newtonsoft.Json;
+using JungleQueue.Interfaces.Serialization;
 
 namespace JungleQueue.Messaging
 {
@@ -34,10 +34,17 @@ namespace JungleQueue.Messaging
     internal class MessageParser : IMessageParser
     {
         /// <summary>
+        /// Object to decode inbound messages
+        /// </summary>
+        private readonly IMessageSerializer _messageSerializer;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MessageParser" /> class.
         /// </summary>
-        public MessageParser()
+        /// <param name="messageSerializer">Object to decode inbound messages</param>
+        public MessageParser(IMessageSerializer messageSerializer)
         {
+            _messageSerializer = messageSerializer;
         }
 
         /// <summary>
@@ -68,7 +75,7 @@ namespace JungleQueue.Messaging
                 }
                 else
                 {
-                    Sns.SnsMessage snsMessage = JsonConvert.DeserializeObject<Sns.SnsMessage>(message.Body);
+                    Sns.SnsMessage snsMessage = _messageSerializer.Deserialize(message.Body, typeof(Sns.SnsMessage)) as Sns.SnsMessage;
                     if (snsMessage.MessageAttributes == null || !snsMessage.MessageAttributes.ContainsKey("messageType"))
                     {
                         parsedMessage.MessageParsingSucceeded = false;
@@ -90,7 +97,7 @@ namespace JungleQueue.Messaging
                 }
                 else
                 {
-                    parsedMessage.Message = JsonConvert.DeserializeObject(parsedMessage.Body, parsedMessage.MessageType);
+                    parsedMessage.Message = _messageSerializer.Deserialize(parsedMessage.Body, parsedMessage.MessageType);
                     parsedMessage.MessageParsingSucceeded = true;
                 }
             }

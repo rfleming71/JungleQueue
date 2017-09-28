@@ -38,10 +38,10 @@ namespace JungleQueue.Tests.Messaging
             _messageProcessor.Setup(x => x.ProcessFaultedMessage(It.IsAny<TransportMessage>(), It.IsAny<Exception>())).Returns(Task.CompletedTask);
             _messageProcessor.Setup(x => x.ProcessMessageStatistics(It.IsAny<IMessageStatistics>())).Returns(Task.CompletedTask);
 
-            _messagePump = new MessagePump(_queue.Object, MaxTryCount, _messageProcessor.Object, _messageLogger.Object, 1);
+            _messagePump = new MessagePump(_queue.Object, MaxTryCount, _messageProcessor.Object, _messageLogger.Object, null);
             _messagePump.MaxSimultaneousMessages = 1;
 
-            _queue.Setup(x => x.GetMessages(It.IsAny<CancellationToken>())).Returns(Task.FromResult((IEnumerable<TransportMessage>)new[] { _message }))
+            _queue.Setup(x => x.GetMessages(It.IsAny<IMessageParser>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult((IEnumerable<TransportMessage>)new[] { _message }))
                 .Callback(() => _messagePump.Stop());
             _queue.Setup(x => x.RemoveMessage(It.IsAny<TransportMessage>())).Returns(Task.CompletedTask);
         }
@@ -51,7 +51,7 @@ namespace JungleQueue.Tests.Messaging
         {
             await _messagePump.Run();
             await Task.Delay(500);
-            _queue.Verify(x => x.GetMessages(It.IsAny<CancellationToken>()), Times.Once());
+            _queue.Verify(x => x.GetMessages(It.IsAny<IMessageParser>(), It.IsAny<CancellationToken>()), Times.Once());
             _queue.Verify(x => x.RemoveMessage(It.Is<TransportMessage>(t => t.ReceiptHandle == "123")), Times.Once());
             _messageProcessor.Verify(x => x.ProcessMessage(It.IsAny<TransportMessage>()), Times.Once());
         }
@@ -62,7 +62,7 @@ namespace JungleQueue.Tests.Messaging
             _message.MessageParsingSucceeded = false;
             await _messagePump.Run();
             await Task.Delay(500);
-            _queue.Verify(x => x.GetMessages(It.IsAny<CancellationToken>()), Times.Once());
+            _queue.Verify(x => x.GetMessages(It.IsAny<IMessageParser>(), It.IsAny<CancellationToken>()), Times.Once());
             _queue.Verify(x => x.RemoveMessage(It.IsAny<TransportMessage>()), Times.Never());
             _messageProcessor.Verify(x => x.ProcessMessage(It.IsAny<TransportMessage>()), Times.Never());
         }
@@ -74,7 +74,7 @@ namespace JungleQueue.Tests.Messaging
             _messageProcessor.Setup(x => x.ProcessMessage(It.IsAny<TransportMessage>())).Returns(Task.FromResult(new MessageProcessingResult() { WasSuccessful = false }));
             await _messagePump.Run();
             await Task.Delay(500);
-            _queue.Verify(x => x.GetMessages(It.IsAny<CancellationToken>()), Times.Once());
+            _queue.Verify(x => x.GetMessages(It.IsAny<IMessageParser>(), It.IsAny<CancellationToken>()), Times.Once());
             _queue.Verify(x => x.RemoveMessage(It.IsAny<TransportMessage>()), Times.Never());
             _messageProcessor.Verify(x => x.ProcessMessage(It.IsAny<TransportMessage>()), Times.Once());
             _messageProcessor.Verify(x => x.ProcessFaultedMessage(It.IsAny<TransportMessage>(), It.IsAny<Exception>()), Times.Never());
@@ -87,7 +87,7 @@ namespace JungleQueue.Tests.Messaging
             _messageProcessor.Setup(x => x.ProcessMessage(It.IsAny<TransportMessage>())).Returns(Task.FromResult(new MessageProcessingResult() { WasSuccessful = false, Exception = new Exception()}));
             await _messagePump.Run();
             await Task.Delay(500);
-            _queue.Verify(x => x.GetMessages(It.IsAny<CancellationToken>()), Times.Once());
+            _queue.Verify(x => x.GetMessages(It.IsAny<IMessageParser>(), It.IsAny<CancellationToken>()), Times.Once());
             _queue.Verify(x => x.RemoveMessage(It.IsAny<TransportMessage>()), Times.Never());
             _messageProcessor.Verify(x => x.ProcessMessage(It.IsAny<TransportMessage>()), Times.Once());
             _messageProcessor.Verify(x => x.ProcessFaultedMessage(It.IsAny<TransportMessage>(), It.IsAny<Exception>()), Times.Once());

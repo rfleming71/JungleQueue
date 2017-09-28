@@ -64,6 +64,11 @@ namespace JungleQueue.Messaging
         private readonly IMessageLogger _messageLogger;
 
         /// <summary>
+        /// Object to parse inbound messages
+        /// </summary>
+        private readonly IMessageParser _messageParser;
+
+        /// <summary>
         /// Token used to control when to stop the pump
         /// </summary>
         private CancellationTokenSource _cancellationToken;
@@ -75,20 +80,16 @@ namespace JungleQueue.Messaging
         /// <param name="messageRetryCount">Number of times to retry a message</param>
         /// <param name="messageProcessor">Class for calling out to event handlers</param>
         /// <param name="messageLogger">Instance of the message logger</param>
-        /// <param name="id">Id of the message pump</param>
-        public MessagePump(ISqsQueue queue, int messageRetryCount, IMessageProcessor messageProcessor, IMessageLogger messageLogger, int id)
+        /// <param name="messageParser">Parses inbound messages</param>
+        public MessagePump(ISqsQueue queue, int messageRetryCount, IMessageProcessor messageProcessor, IMessageLogger messageLogger, IMessageParser messageParser)
         {
             _queue = queue;
             _messageRetryCount = messageRetryCount;
             _messageProcessor = messageProcessor;
             _cancellationToken = new CancellationTokenSource();
             _messageLogger = messageLogger;
+            _messageParser = messageParser;
         }
-
-        /// <summary>
-        /// Gets the id of the message pump
-        /// </summary>
-        public int Id { get; private set; }
 
         /// <summary>
         /// Gets or sets the maximum number messages to process
@@ -105,12 +106,12 @@ namespace JungleQueue.Messaging
             SemaphoreSlim semaphore = new SemaphoreSlim(MaxSimultaneousMessages);
             while (!_cancellationToken.IsCancellationRequested)
             {
-                Log.TraceFormat("[{0}] Starting receiving call", Id);
+                Log.Trace("Starting receiving call");
                 try
                 {
                     await semaphore.WaitAsync(_cancellationToken.Token); // Wait for a worker slot to become available
-                    IEnumerable<TransportMessage> ReceivedMessages = await _queue.GetMessages(_cancellationToken.Token);
-                    Log.TraceFormat("[{1}] Received {0} messages", ReceivedMessages.Count(), Id);
+                    IEnumerable<TransportMessage> ReceivedMessages = await _queue.GetMessages(_messageParser, _cancellationToken.Token);
+                    Log.TraceFormat("Received {0} messages", ReceivedMessages.Count());
                     if (!ReceivedMessages.Any())
                     {
                         semaphore.Release(); // Mark the slot as free again if we aren't going to use it
@@ -129,36 +130,36 @@ namespace JungleQueue.Messaging
                 }
                 catch (Exception ex)
                 {
-                    Log.ErrorFormat("[{0}] Error occurred in message pump run", ex, Id);
+                    Log.Error("Error occurred in message pump run", ex);
                 }
             }
         }
 
         private async Task ProcessMessage(TransportMessage message)
         {
-            Log.InfoFormat("[{1}] Received message of type '{0}'", message.MessageTypeName, Id);
+            Log.InfoFormat("Received message of type '{0}'", message.MessageTypeName);
             _messageLogger.InboundLogMessage(message.Body, message.MessageTypeName, message.Id, message.AttemptNumber);
             MessageProcessingResult result;
             if (message.MessageParsingSucceeded)
             {
-                Log.TraceFormat("[{0}] Processing message", Id);
+                Log.Trace("Processing message");
                 result = await _messageProcessor.ProcessMessage(message);
-                Log.TraceFormat("[{0}] Processed message - Error: {1}", Id, !result.WasSuccessful);
+                Log.TraceFormat("Processed message - Error: {0}", !result.WasSuccessful);
             }
             else
             {
-                Log.ErrorFormat("[{1}] Failed to parse message of type {0}", message.Exception, message.MessageTypeName, Id);
+                Log.ErrorFormat("Failed to parse message of type {0}", message.Exception, message.MessageTypeName);
                 result = new MessageProcessingResult() { WasSuccessful = false, Exception = new Exception("Message parse failure") };
             }
 
             if (result.WasSuccessful)
             {
-                Log.InfoFormat("[{0}] Removing message from the queue", Id);
+                Log.Info("Removing message from the queue");
                 await _queue.RemoveMessage(message);
             }
             else if (message.AttemptNumber == _messageRetryCount)
             {
-                Log.InfoFormat("[{0}] Message faulted ", Id);
+                Log.Info("Message faulted ");
                 await _messageProcessor.ProcessFaultedMessage(message, result.Exception);
             }
 
@@ -179,7 +180,7 @@ namespace JungleQueue.Messaging
         /// </summary>
         public void Stop()
         {
-            Log.InfoFormat("[{0}] Stop requested", Id);
+            Log.Info("Stop requested");
             _cancellationToken.Cancel();
         }
 

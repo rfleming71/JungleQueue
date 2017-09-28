@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Amazon.SQS.Model;
 using JungleQueue.Messaging;
+using JungleQueue.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace JungleQueue.Tests.Messaging
@@ -17,7 +18,7 @@ namespace JungleQueue.Tests.Messaging
         {
             _attributes = new Dictionary<string, string>() { { "ApproximateReceiveCount", "3" } };
             _messageAttributes = new Dictionary<string, MessageAttributeValue>() { { "messageType", new MessageAttributeValue() { DataType = "String", StringValue = typeof(TestMessage).AssemblyQualifiedName } } };
-            _parser = new MessageParser();
+            _parser = new MessageParser(new JsonNetSerializer());
         }
 
         [TestMethod]

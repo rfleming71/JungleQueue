@@ -18,6 +18,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JungleQueue.StructureMap", "JungleQueue.StructureMap\JungleQueue.StructureMap.csproj", "{6B00D6F4-21CC-441E-A6D0-5ED1D9A84A82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{B6E03E31-3B6C-4DDE-A08A-0189953B2824}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6E03E31-3B6C-4DDE-A08A-0189953B2824}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6E03E31-3B6C-4DDE-A08A-0189953B2824}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B00D6F4-21CC-441E-A6D0-5ED1D9A84A82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B00D6F4-21CC-441E-A6D0-5ED1D9A84A82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B00D6F4-21CC-441E-A6D0-5ED1D9A84A82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B00D6F4-21CC-441E-A6D0-5ED1D9A84A82}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
