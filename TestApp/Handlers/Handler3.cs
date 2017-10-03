@@ -21,7 +21,7 @@ namespace TestApp.Handlers
         public Task Handle(TestMessage2 message)
         {
             _log.Info("Handling message Handler 3");
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }

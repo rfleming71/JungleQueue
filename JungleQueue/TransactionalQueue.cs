@@ -31,6 +31,7 @@ using System.Transactions;
 using Common.Logging;
 using JungleQueue.Aws.Sqs;
 using JungleQueue.Interfaces;
+using JungleQueue.Interfaces.Serialization;
 using JungleQueue.Messaging;
 using Newtonsoft.Json;
 
@@ -62,6 +63,11 @@ namespace JungleQueue
         private readonly IMessageLogger _messageLogger;
 
         /// <summary>
+        /// Message serializer
+        /// </summary>
+        private readonly IMessageSerializer _messageSerializer;
+
+        /// <summary>
         /// Gets the common message metadata
         /// </summary>
         private Dictionary<string, string> _commonMessageMetadata;
@@ -71,11 +77,13 @@ namespace JungleQueue
         /// </summary>
         /// <param name="queue">Underlying SQS queue</param>
         /// <param name="messageLogger">Message logger</param>
-        public TransactionalQueue(ISqsQueue queue, IMessageLogger messageLogger)
+        /// <param name="messageSerializer">Message serializer</param>
+        public TransactionalQueue(ISqsQueue queue, IMessageLogger messageLogger, IMessageSerializer messageSerializer)
         {
             _queue = queue;
             _transactionalMessages = new List<KeyValuePair<object, Type>>();
             _messageLogger = messageLogger;
+            _messageSerializer = messageSerializer;
         }
 
         /// <summary>
@@ -189,7 +197,7 @@ namespace JungleQueue
         private void InternalSend(object message, Type type)
         {
             Log.TraceFormat("Sending message of type {0}", type);
-            string messageString = JsonConvert.SerializeObject(message);
+            string messageString = _messageSerializer.Serialize(message);
             List<KeyValuePair<string, string>> metadata = new List<KeyValuePair<string, string>>()
             {
                 new KeyValuePair<string, string>("messageType", type.AssemblyQualifiedName)

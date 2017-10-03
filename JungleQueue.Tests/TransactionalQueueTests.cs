@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using JungleQueue.Aws.Sqs;
 using JungleQueue.Messaging;
+using JungleQueue.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -24,7 +25,7 @@ namespace JungleQueue.Tests
             _messageLogger = new Mock<IMessageLogger>(MockBehavior.Strict);
             _messageLogger.Setup(x => x.OutboundLogMessage(It.IsAny<string>(), It.IsAny<string>()));
 
-            _queueUnderTest = new TransactionalQueue(_sqsQueue.Object, _messageLogger.Object);
+            _queueUnderTest = new TransactionalQueue(_sqsQueue.Object, _messageLogger.Object, new JsonNetSerializer());
         }
 
         [TestMethod]

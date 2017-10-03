@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using Amazon;
 using JungleQueue.Interfaces.Configuration;
 using JungleQueue.Interfaces.IoC;
+using JungleQueue.Interfaces.Serialization;
 using JungleQueue.Messaging;
 
 namespace JungleQueue.Configuration
@@ -79,6 +80,11 @@ namespace JungleQueue.Configuration
         /// Gets or sets the object builder for the queue
         /// </summary>
         public IObjectBuilder ObjectBuilder { get; set; }
+
+        /// <summary>
+        /// Gets or sets the object to serialize/deserialize messages
+        /// </summary>
+        public IMessageSerializer MessageSerializer { get; set; }
 
         /// <summary>
         /// Gets or sets the action called before a message handler is called

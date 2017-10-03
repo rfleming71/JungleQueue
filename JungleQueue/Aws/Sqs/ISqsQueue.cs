@@ -45,16 +45,12 @@ namespace JungleQueue.Aws.Sqs
         int WaitTimeSeconds { get; set; }
 
         /// <summary>
-        /// Gets or sets the message parser for inbound messages
-        /// </summary>
-        IMessageParser MessageParser { get; set; }
-
-        /// <summary>
         /// Retrieve messages from the underlying queue
         /// </summary>
+        /// <param name="messageParser">Parses the inbound messages</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Messages or empty</returns>
-        Task<IEnumerable<TransportMessage>> GetMessages(CancellationToken cancellationToken);
+        Task<IEnumerable<TransportMessage>> GetMessages(IMessageParser messageParser, CancellationToken cancellationToken);
 
         /// <summary>
         /// Initializes the queue
