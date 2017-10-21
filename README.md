@@ -18,7 +18,7 @@ queue.StartReceiving();
 queue.CreateSendQueue().Publish(new TestMessage());
 ```
 
-#Example message handler
+# Example message handler
 ```C#
 public class Handler2 : IHandleMessage<TestMessage>
 {

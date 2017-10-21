@@ -1,0 +1,29 @@
+version: 1.2.0.{build}
+image: Visual Studio 2017
+configuration: Release
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+before_build:
+- cmd: dotnet restore
+build:
+  verbosity: minimal
+test_script:
+- ps: >-
+    dotnet test .\JungleQueue.Tests -l "trx;logfilename=testresults.xml"
+
+
+    $wc = New-Object 'System.Net.WebClient'
+
+    $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", (Resolve-Path .\JungleQueue.Tests\TestResults\testresults.xml))
+artifacts:
+- path: .\JungleQueue\bin\Release\JungleQueue.*.nupkg
+  name: JungleQueue Nupkg
+- path: .\JungleQueue.Interfaces\bin\Release\JungleQueue.Interfaces.*.nupkg
+  name: JungleQueue.Interfaces Nupkg
+- path: .\JungleQueue.StructureMap\bin\Release\JungleQueue.StructureMap.*.nupkg
+  name: JungleQueue.StructureMap Nupkg
+- path: .\JungleQueue.Testing\bin\Release\JungleQueue.Testing.*.nupkg
+  name: JungleQueue.Testing Nupkg
