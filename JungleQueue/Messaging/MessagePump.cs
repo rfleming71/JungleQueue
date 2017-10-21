@@ -21,6 +21,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 // </copyright>
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,8 +29,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common.Logging;
 using JungleQueue.Aws.Sqs;
-using JungleQueue.Interfaces;
-using JungleQueue.Messaging;
 
 namespace JungleQueue.Messaging
 {
@@ -104,18 +103,30 @@ namespace JungleQueue.Messaging
         {
             Log.InfoFormat("Starting message pump with max sim messages of {0}", MaxSimultaneousMessages);
             SemaphoreSlim semaphore = new SemaphoreSlim(MaxSimultaneousMessages);
+            Delayer messageCheckDelay = new Delayer(); 
             while (!_cancellationToken.IsCancellationRequested)
             {
                 Log.Trace("Starting receiving call");
                 try
                 {
+                    await messageCheckDelay.Delay(_cancellationToken.Token);
                     await semaphore.WaitAsync(_cancellationToken.Token); // Wait for a worker slot to become available
+                    if (_cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
                     IEnumerable<TransportMessage> ReceivedMessages = await _queue.GetMessages(_messageParser, _cancellationToken.Token);
                     Log.TraceFormat("Received {0} messages", ReceivedMessages.Count());
                     if (!ReceivedMessages.Any())
                     {
                         semaphore.Release(); // Mark the slot as free again if we aren't going to use it
                     }
+                    else
+                    {
+                        messageCheckDelay.Reset();
+                    }
+
                     foreach (TransportMessage message in ReceivedMessages)
                     {
                         ThreadPool.QueueUserWorkItem(async _ =>
