@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
-using JungleQueue.Aws.Sqs;
+using JungleQueue.Queues;
 using JungleQueue.Messaging;
 using JungleQueue.Serialization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -13,13 +13,13 @@ namespace JungleQueue.Tests
     public class TransactionalQueueTests
     {
         private TransactionalQueue _queueUnderTest;
-        private Mock<ISqsQueue> _sqsQueue;
+        private Mock<IProviderQueue> _sqsQueue;
         private Mock<IMessageLogger> _messageLogger;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _sqsQueue = new Mock<ISqsQueue>(MockBehavior.Strict);
+            _sqsQueue = new Mock<IProviderQueue>(MockBehavior.Strict);
             _sqsQueue.Setup(x => x.AddMessage(It.IsAny<string>(), It.IsAny<IEnumerable<KeyValuePair<string, string>>>())).Returns(Task.CompletedTask);
 
             _messageLogger = new Mock<IMessageLogger>(MockBehavior.Strict);

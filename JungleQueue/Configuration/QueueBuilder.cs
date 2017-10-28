@@ -45,7 +45,19 @@ namespace JungleQueue.Configuration
         /// <param name="queueName">Queue name</param>
         /// <param name="region">AWS Region the queue lives in</param>
         /// <returns>Queue configuration</returns>
+        [Obsolete("Obsolete in 1.2. Replaced by CreateUseingSqsQueue")]
         public static IConfigureObjectBuilder Create(string queueName, RegionEndpoint region)
+        {
+            return CreateUsingSqsQueue(queueName, region);
+        }
+
+        /// <summary>
+        /// Starting method for the configuration
+        /// </summary>
+        /// <param name="queueName">Queue name</param>
+        /// <param name="region">AWS Region the queue lives in</param>
+        /// <returns>Queue configuration</returns>
+        public static IConfigureObjectBuilder CreateUsingSqsQueue(string queueName, RegionEndpoint region)
         {
             if (string.IsNullOrWhiteSpace(queueName))
             {
@@ -57,7 +69,7 @@ namespace JungleQueue.Configuration
                 throw new JungleConfigurationException("region", "Region cannot be null");
             }
 
-            return new QueueConfiguration()
+            return new SqsQueueConfiguration()
             {
                 MessageLogger = new NoOpMessageLogger(),
                 QueueName = queueName,
@@ -67,6 +79,24 @@ namespace JungleQueue.Configuration
                 MaxSimultaneousMessages = 0,
                 RetryCount = 5,
                 SqsPollWaitTime = 14,
+            };
+        }
+
+        public static IConfigureObjectBuilder CreateUsingFileQueue(string folderPath)
+        {
+            if (string.IsNullOrWhiteSpace(folderPath))
+            {
+                throw new JungleConfigurationException("folderPath", "Cannot have a blank input folder");
+            }
+
+            return new FileQueueConfiguration()
+            {
+                MessageLogger = new NoOpMessageLogger(),
+                FaultHandlers = new Dictionary<Type, HashSet<Type>>(),
+                Handlers = new Dictionary<Type, HashSet<Type>>(),
+                MaxSimultaneousMessages = 0,
+                RetryCount = 5,
+                QueueFolder = folderPath,
             };
         }
 

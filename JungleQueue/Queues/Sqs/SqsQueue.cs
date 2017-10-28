@@ -33,12 +33,12 @@ using Amazon.SQS.Model;
 using JungleQueue.Interfaces.Exceptions;
 using JungleQueue.Messaging;
 
-namespace JungleQueue.Aws.Sqs
+namespace JungleQueue.Queues.Sqs
 {
     /// <summary>
     /// Represents the SQS queue in Amazon AWS
     /// </summary>
-    public sealed class SqsQueue : ISqsQueue, IDisposable
+    public sealed class SqsQueue : IProviderQueue, IDisposable
     {
         /// <summary>
         /// Underlying queue name

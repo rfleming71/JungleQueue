@@ -40,7 +40,9 @@ namespace TestApp
 
         static IRunJungleQueue CreateFullQueue()
         {
-            return QueueBuilder.Create("JungleQueue_Testing", RegionEndpoint.USEast1)
+            return
+                //QueueBuilder.CreateUsingSqsQueue("JungleQueue_Testing", RegionEndpoint.USEast1)
+                QueueBuilder.CreateUsingFileQueue("C:\\temp\\filequeue")
                 .WithSimpleObjectBuilder()
                 .UsingJsonSerialization()
                 .EnableMessageLogging()

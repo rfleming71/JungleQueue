@@ -29,11 +29,10 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Transactions;
 using Common.Logging;
-using JungleQueue.Aws.Sqs;
+using JungleQueue.Queues;
 using JungleQueue.Interfaces;
 using JungleQueue.Interfaces.Serialization;
 using JungleQueue.Messaging;
-using Newtonsoft.Json;
 
 namespace JungleQueue
 {
@@ -55,7 +54,7 @@ namespace JungleQueue
         /// <summary>
         /// The underlying SQS queue
         /// </summary>
-        private readonly ISqsQueue _queue;
+        private readonly IProviderQueue _queue;
 
         /// <summary>
         /// Message logger
@@ -78,7 +77,7 @@ namespace JungleQueue
         /// <param name="queue">Underlying SQS queue</param>
         /// <param name="messageLogger">Message logger</param>
         /// <param name="messageSerializer">Message serializer</param>
-        public TransactionalQueue(ISqsQueue queue, IMessageLogger messageLogger, IMessageSerializer messageSerializer)
+        public TransactionalQueue(IProviderQueue queue, IMessageLogger messageLogger, IMessageSerializer messageSerializer)
         {
             _queue = queue;
             _transactionalMessages = new List<KeyValuePair<object, Type>>();

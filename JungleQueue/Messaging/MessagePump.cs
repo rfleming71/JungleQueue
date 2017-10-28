@@ -28,7 +28,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Logging;
-using JungleQueue.Aws.Sqs;
+using JungleQueue.Queues;
 
 namespace JungleQueue.Messaging
 {
@@ -50,7 +50,7 @@ namespace JungleQueue.Messaging
         /// <summary>
         /// Queue to read messages from
         /// </summary>
-        private readonly ISqsQueue _queue;
+        private readonly IProviderQueue _queue;
 
         /// <summary>
         /// Number of times to retry a message
@@ -80,7 +80,7 @@ namespace JungleQueue.Messaging
         /// <param name="messageProcessor">Class for calling out to event handlers</param>
         /// <param name="messageLogger">Instance of the message logger</param>
         /// <param name="messageParser">Parses inbound messages</param>
-        public MessagePump(ISqsQueue queue, int messageRetryCount, IMessageProcessor messageProcessor, IMessageLogger messageLogger, IMessageParser messageParser)
+        public MessagePump(IProviderQueue queue, int messageRetryCount, IMessageProcessor messageProcessor, IMessageLogger messageLogger, IMessageParser messageParser)
         {
             _queue = queue;
             _messageRetryCount = messageRetryCount;

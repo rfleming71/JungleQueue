@@ -27,12 +27,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using JungleQueue.Messaging;
 
-namespace JungleQueue.Aws.Sqs
+namespace JungleQueue.Queues
 {
     /// <summary>
     /// Amazon SQS Message queue
     /// </summary>
-    public interface ISqsQueue : IDisposable
+    public interface IProviderQueue : IDisposable
     {
         /// <summary>
         /// Gets the URL for the queue

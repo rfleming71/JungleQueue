@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using JungleQueue.Aws.Sqs;
-using JungleQueue.Interfaces;
+using JungleQueue.Queues;
 using JungleQueue.Interfaces.Statistics;
 using JungleQueue.Messaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,7 +14,7 @@ namespace JungleQueue.Tests.Messaging
     public class MessagePumpTests
     {
         private MessagePump _messagePump;
-        private Mock<ISqsQueue> _queue;
+        private Mock<IProviderQueue> _queue;
         private Mock<IMessageProcessor> _messageProcessor;
         private Mock<IMessageLogger> _messageLogger;
         private TransportMessage _message;
@@ -32,7 +31,7 @@ namespace JungleQueue.Tests.Messaging
                 Body = "{}",
                 Message = "new message",
             };
-            _queue = new Mock<ISqsQueue>(MockBehavior.Strict);
+            _queue = new Mock<IProviderQueue>(MockBehavior.Strict);
             _messageProcessor = new Mock<IMessageProcessor>(MockBehavior.Strict);
             _messageProcessor.Setup(x => x.ProcessMessage(It.IsAny<TransportMessage>())).Returns(Task.FromResult(new MessageProcessingResult() { WasSuccessful = true }));
             _messageProcessor.Setup(x => x.ProcessFaultedMessage(It.IsAny<TransportMessage>(), It.IsAny<Exception>())).Returns(Task.CompletedTask);

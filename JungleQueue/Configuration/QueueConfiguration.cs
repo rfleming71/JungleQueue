@@ -23,7 +23,6 @@
 // </copyright>
 using System;
 using System.Collections.Generic;
-using Amazon;
 using JungleQueue.Interfaces.Configuration;
 using JungleQueue.Interfaces.IoC;
 using JungleQueue.Interfaces.Serialization;
@@ -36,16 +35,6 @@ namespace JungleQueue.Configuration
     /// </summary>
     public class QueueConfiguration : IConfigureMessageSerializer, IConfigureObjectBuilder
     {
-        /// <summary>
-        /// Gets or sets the name of the input queue
-        /// </summary>
-        public string QueueName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the AWS Region
-        /// </summary>
-        public RegionEndpoint Region { get; set; }
-
         /// <summary>
         /// Gets or sets the number of times to attempt to process a message
         /// </summary>

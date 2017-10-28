@@ -22,11 +22,10 @@
 // SOFTWARE.
 // </copyright>
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Common.Logging;
-using JungleQueue.Aws.Sqs;
+using JungleQueue.Queues;
+using JungleQueue.Queues.Sqs;
 using JungleQueue.Configuration;
 using JungleQueue.Interfaces;
 using JungleQueue.Interfaces.IoC;
@@ -48,7 +47,7 @@ namespace JungleQueue
         /// <summary>
         /// SQS queue
         /// </summary>
-        private readonly ISqsQueue _queue;
+        private readonly IProviderQueue _queue;
 
         /// <summary>
         /// Receive event message pump
@@ -83,8 +82,18 @@ namespace JungleQueue
                 x.RegisterInstance(CreateSendQueue());
                 configuration.Prehandler?.Invoke(x);
             };
-            _queue = new SqsQueue(configuration.Region, configuration.QueueName, configuration.RetryCount);
+
+            if (configuration is FileQueueConfiguration)
+            {
+                _queue = new Queues.File.FileQueue((configuration as FileQueueConfiguration).QueueFolder, configuration.RetryCount);
+            }
+            else
+            {
+                SqsQueueConfiguration sqsConfiguration = configuration as SqsQueueConfiguration;
+                _queue = new SqsQueue(sqsConfiguration.Region, sqsConfiguration.QueueName, configuration.RetryCount);
+            }
             _queue.WaitTimeSeconds = configuration.SqsPollWaitTime;
+
             if (configuration.MaxSimultaneousMessages > 0)
             {
                 MessageParser parser = new MessageParser(configuration.MessageSerializer);
